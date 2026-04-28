@@ -440,6 +440,12 @@
         gap: 6px;
         flex-wrap: wrap;
       }
+
+      .parking-block {
+        margin-top: 16px;
+        padding-top: 14px;
+        border-top: 1px solid var(--blush-light);
+      }
       .event-card.left .map-links {
         justify-content: flex-end;
       }
@@ -549,6 +555,13 @@
       </div>
     </section>
 
+    <!-- CIVIL CEREMONY 29 MAI -->
+    <section class="section-wrap">
+      <h2 class="section-heading">Cununia Civilă · 29 Mai 2026</h2>
+      <div class="section-ornament"><span>✦</span></div>
+      <div class="timeline" id="civil-timeline"></div>
+    </section>
+
     <!-- COUNTDOWN -->
     <section class="countdown-section">
       <p class="section-label">Vom deveni o familie în</p>
@@ -592,6 +605,30 @@
 
     <script>
       const WEDDING_DATE_STR = "2026-05-02";
+      const CIVIL_DATE_STR = "2026-05-29";
+
+      const civilEvents = [
+        {
+          time: "12:00",
+          end: "12:30",
+          title: "Cununia Civilă 💍",
+          address:
+            "Serviciul Stare Civilă, Bulevardul Mircea Vodă 5, Sector 3, București",
+          coords: "44.4313261669255,26.111797243166396",
+          googleMapsUrl: "https://maps.app.goo.gl/scP8MiXJzfEJ726i9",
+          maps: true,
+        },
+        {
+          time: "12:30",
+          end: "20:00",
+          title: "Restaurant Haute Pepper 🥂",
+          address: "Bulevardul Unirii 2, 040104 București",
+          coords: "44.42696628512524,26.093270804179326",
+          googleMapsUrl: "https://maps.app.goo.gl/EzFZifMV5sjPgKL28",
+          maps: true,
+          parkingCoords: "44.42686664004211, 26.09284108511247",
+        },
+      ];
 
       const events = [
         {
@@ -602,6 +639,7 @@
           coords: "44.4236173,26.1018919",
           query: "Biserica+Sfântul+Spiridon-Nou,+București",
           maps: true,
+          parkingCoords: "44.424325635619766, 26.102772583023583",
         },
         {
           time: "16:00",
@@ -622,6 +660,79 @@
           nextDay: true,
         },
       ];
+
+      function renderCivilTimeline() {
+        const container = document.getElementById("civil-timeline");
+        const now = new Date();
+        const todayStr = now.toISOString().split("T")[0];
+        const isCivilDay = todayStr === CIVIL_DATE_STR;
+        const currentMinutes = isCivilDay
+          ? now.getHours() * 60 + now.getMinutes()
+          : -1;
+
+        container.innerHTML = "";
+
+        civilEvents.forEach((event, index) => {
+          const card = document.createElement("div");
+          card.className = `event-card ${index % 2 === 0 ? "left" : "right"}`;
+
+          const startMin = timeToMinutes(event.time);
+          const endMin = timeToMinutes(event.end);
+
+          if (
+            isCivilDay &&
+            currentMinutes >= startMin &&
+            currentMinutes < endMin
+          ) {
+            card.classList.add("active");
+          }
+
+          let mapHtml = "";
+          let btnHtml = "";
+
+          if (event.maps && event.coords) {
+            mapHtml = `
+              <div class="map-preview">
+                <iframe
+                  src="https://maps.google.com/maps?q=${event.coords}&z=17&t=k&iwloc=0&output=embed"
+                  frameborder="0" scrolling="no" loading="lazy"
+                  title="${event.title} – hartă"></iframe>
+              </div>`;
+            btnHtml = `
+              <p class="nav-label">Navighează cu</p>
+              <div class="map-links">
+                <a href="${event.googleMapsUrl}" target="_blank" rel="noopener" class="btn-map btn-google">Google Maps</a>
+                <a href="https://waze.com/ul?ll=${event.coords}&navigate=yes" target="_blank" rel="noopener" class="btn-map btn-waze">Waze</a>
+                <a href="http://maps.apple.com/?ll=${event.coords}" target="_blank" rel="noopener" class="btn-map btn-apple">Apple Maps</a>
+              </div>`;
+          }
+
+          let parkingHtml = "";
+          if (event.parkingCoords) {
+            parkingHtml = `
+              <div class="parking-block">
+                <p class="nav-label">🅿️ Parcheaza aici:</p>
+                <div class="map-links">
+                  <a href="https://www.google.com/maps/search/?api=1&query=${event.parkingCoords}" target="_blank" rel="noopener" class="btn-map btn-google">Google Maps</a>
+                  <a href="https://waze.com/ul?ll=${event.parkingCoords}&navigate=yes" target="_blank" rel="noopener" class="btn-map btn-waze">Waze</a>
+                  <a href="http://maps.apple.com/?ll=${event.parkingCoords}&q=Parcare" target="_blank" rel="noopener" class="btn-map btn-apple">Apple Maps</a>
+                </div>
+              </div>`;
+          }
+
+          card.innerHTML = `
+            ${card.classList.contains("active") ? '<span class="event-badge">În desfășurare</span>' : ""}
+            <span class="event-time">${event.time}</span>
+            <span class="event-title">${event.title}</span>
+            ${event.address ? `<span class="event-address">${event.address}</span>` : ""}
+            ${mapHtml}
+            ${btnHtml}
+            ${parkingHtml}
+          `;
+
+          container.appendChild(card);
+        });
+      }
 
       function timeToMinutes(str) {
         const [h, m] = str.split(":").map(Number);
@@ -682,6 +793,19 @@
                         </div>`;
           }
 
+          let parkingHtml = "";
+          if (event.parkingCoords) {
+            parkingHtml = `
+              <div class="parking-block">
+                <p class="nav-label">🅿️ Parcheaza aici:</p>
+                <div class="map-links">
+                  <a href="https://www.google.com/maps/search/?api=1&query=${event.parkingCoords}" target="_blank" rel="noopener" class="btn-map btn-google">Google Maps</a>
+                  <a href="https://waze.com/ul?ll=${event.parkingCoords}&navigate=yes" target="_blank" rel="noopener" class="btn-map btn-waze">Waze</a>
+                  <a href="http://maps.apple.com/?ll=${event.parkingCoords}&q=Parcare" target="_blank" rel="noopener" class="btn-map btn-apple">Apple Maps</a>
+                </div>
+              </div>`;
+          }
+
           card.innerHTML = `
                     ${card.classList.contains("active") ? '<span class="event-badge">În desfășurare</span>' : ""}
                     <span class="event-time">${event.time}</span>
@@ -689,6 +813,7 @@
                     ${event.address ? `<span class="event-address">${event.address}</span>` : ""}
                     ${mapHtml}
                     ${btnHtml}
+                    ${parkingHtml}
                 `;
 
           container.appendChild(card);
@@ -729,10 +854,12 @@
         );
       }
 
+      renderCivilTimeline();
       renderTimeline();
       updateCountdown();
       setInterval(updateCountdown, 1000);
       setInterval(renderTimeline, 30000);
+      setInterval(renderCivilTimeline, 30000);
     </script>
   </body>
 </html>
