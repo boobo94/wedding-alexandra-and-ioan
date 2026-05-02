@@ -605,7 +605,7 @@
 
     <script>
       const WEDDING_DATE_STR = "2026-05-02";
-      const CIVIL_DATE_STR = "2026-05-29";
+      const CIVIL_DATE_STR = "2026-04-29";
 
       const civilEvents = [
         {
@@ -664,6 +664,14 @@
       function renderCivilTimeline() {
         const container = document.getElementById("civil-timeline");
         const now = new Date();
+        const civilDate = new Date(CIVIL_DATE_STR);
+
+        // Hide the civil ceremony section if the date has passed
+        if (now > civilDate) {
+          container.parentElement.style.display = "none";
+          return;
+        }
+
         const todayStr = now.toISOString().split("T")[0];
         const isCivilDay = todayStr === CIVIL_DATE_STR;
         const currentMinutes = isCivilDay
